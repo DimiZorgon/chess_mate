@@ -82,8 +82,16 @@ export async function createGame(gameId, whiteId, blackId, initialFen, timeMode)
 }
 
 // Mettre à jour l'échiquier à chaque coup joué
-export async function updateGameState(gameId, fen) {
-  await runQuery('UPDATE games SET fen = ? WHERE id = ?;', [fen, gameId]);
+export async function updateGameState(gameId, fen, status) {
+  if (status) {
+    await runQuery('UPDATE games SET fen = ?, status = ? WHERE id = ?;', [fen, status, gameId]);
+  } else {
+    await runQuery('UPDATE games SET fen = ? WHERE id = ?;', [fen, gameId]);
+  }
+}
+
+export async function updateGamePlayers(gameId, blackPlayerId) {
+  await runQuery('UPDATE games SET black_player_id = ? WHERE id = ?;', [blackPlayerId, gameId]);
 }
 
 // Récupérer la partie (utile en cas de reconnexion)

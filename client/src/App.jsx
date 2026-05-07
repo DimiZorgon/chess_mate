@@ -3,7 +3,7 @@ import { Chessboard } from 'react-chessboard';
 import { Chess } from 'chess.js';
 import { io } from 'socket.io-client';
 
-const SERVER_URL = 'http://localhost:3000';
+const SERVER_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 const defaultAvatar = '♟️';
 
 function randomGuestName() {
@@ -66,11 +66,17 @@ export default function App() {
       setRoomCode(data.roomId);
       setColor(data.color);
       setPage('game');
+      setWaiting(false);
     });
     client.on('room-joined', (data) => {
       setRoomCode(data.roomId);
       setColor(data.color);
       setPage('game');
+      setWaiting(false);
+    });
+    client.on('waiting-for-opponent', ({ message: waitingMessage }) => {
+      setMessage(waitingMessage);
+      setWaiting(true);
     });
     client.on('game-state', (data) => {
       setFen(data.fen);
@@ -78,10 +84,12 @@ export default function App() {
       setBlackTime(data.blackTime);
       setMessage(data.message || '');
       setGameState(data);
+      setWaiting(false);
     });
     client.on('game-over', (data) => {
       setMessage(data.message);
       setGameState(data);
+      setWaiting(false);
     });
     client.on('error-message', (text) => setMessage(text));
 
@@ -162,7 +170,8 @@ export default function App() {
     socket.emit('create-room', {
       ...playerData(),
       timeControl: Number(timeControl),
-      mode
+      mode,
+      authToken: user?.token || null
     });
   };
 
@@ -174,7 +183,8 @@ export default function App() {
     setMessage('Rejoindre le salon...');
     socket.emit('join-room', {
       roomId: roomCode.trim().toUpperCase(),
-      ...playerData()
+      ...playerData(),
+      authToken: user?.token || null
     });
   };
 
@@ -186,7 +196,7 @@ export default function App() {
       to: target,
       promotion: 'q'
     });
-    return true;
+    return false;
   };
 
   const renderAuthPanel = () => (
