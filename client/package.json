@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "npm run build && wrangler dev",
+    "deploy": "npm run build && wrangler deploy"
   },
   "dependencies": {
     "chess.js": "^1.4.0",
@@ -16,7 +17,9 @@
     "socket.io-client": "^4.8.1"
   },
   "devDependencies": {
+    "@cloudflare/vite-plugin": "^1.36.0",
     "@vitejs/plugin-react": "^6.0.1",
-    "vite": "^8.0.11"
+    "vite": "^8.0.11",
+    "wrangler": "^4.88.0"
   }
 }
